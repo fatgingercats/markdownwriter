@@ -1,0 +1,68 @@
+name: windows-dual-release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        channel: [appx, portable]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build renderer and electron main
+        run: npm run build:electron
+
+      - name: Package AppX
+        if: matrix.channel == 'appx'
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+        run: npx electron-builder --win appx --x64
+
+      - name: Package Portable
+        if: matrix.channel == 'portable'
+        run: npx electron-builder --win portable --x64
+
+      - name: Upload CI artifact
+        if: matrix.channel == 'appx'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mdwriter-appx
+          path: release/*.appx
+
+      - name: Upload CI artifact
+        if: matrix.channel == 'portable'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mdwriter-portable
+          path: release/*-Portable.exe
+
+      - name: Attach AppX to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/') && matrix.channel == 'appx'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.appx
+
+      - name: Attach Portable to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/') && matrix.channel == 'portable'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*-Portable.exe

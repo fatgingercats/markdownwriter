@@ -1,0 +1,45 @@
+/* GFM Styles */
+
+/* Task Lists */
+.preview-content input[type="checkbox"] {
+    margin-right: 0.5em;
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+.preview-content ul.contains-task-list {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.preview-content li.task-list-item {
+    display: flex;
+    align-items: center;
+}
+
+/* Strikethrough */
+.preview-content del {
+    color: #999;
+}
+
+/* Tables */
+.preview-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+}
+
+.preview-content th,
+.preview-content td {
+    padding: 6px 13px;
+    border: 1px solid #dfe2e5;
+}
+
+.preview-content th {
+    font-weight: 600;
+    background-color: #f6f8fa;
+}
+
+.preview-content tr:nth-child(2n) {
+    background-color: #f6f8fa;
+}

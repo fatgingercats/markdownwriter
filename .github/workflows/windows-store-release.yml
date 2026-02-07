@@ -1,0 +1,46 @@
+name: windows-store-release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-store-appx:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (Store mode)
+        run: npm run build:electron:store
+
+      - name: Package AppX (Store mode)
+        env:
+          VITE_LICENSE_MODE: store
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+        run: npx electron-builder --win appx --x64
+
+      - name: Upload CI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mdwriter-store-appx
+          path: release/*.appx
+
+      - name: Attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.appx

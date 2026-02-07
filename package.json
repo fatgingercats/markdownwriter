@@ -1,0 +1,144 @@
+{
+  "name": "mdwriter",
+  "version": "1.0.0",
+  "description": "A minimalist Markdown editor inspired by iA Writer.",
+  "author": "User",
+  "license": "MIT",
+  "private": true,
+  "main": "dist-electron/electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "compile:electron": "tsc -p tsconfig.electron.json",
+    "electron:start": "cross-env NODE_ENV=development electron .",
+    "build:electron": "tsc && vite build && tsc -p tsconfig.electron.json",
+    "build:electron:store": "cross-env VITE_LICENSE_MODE=store npm run build:electron",
+    "package": "npm run build:electron && electron-builder --win",
+    "package:win": "npm run build:electron && electron-builder --win",
+    "package:win:appx": "npm run build:electron && electron-builder --win appx --x64",
+    "package:win:appx:store": "cross-env VITE_LICENSE_MODE=store npm run build:electron && electron-builder --win appx --x64",
+    "package:win:portable": "npm run build:electron && electron-builder --win portable --x64",
+    "package:win:dual": "npm run build:electron && electron-builder --win appx portable --x64",
+    "package:mac": "npm run build:electron && node_modules/.bin/electron-builder.cmd --mac",
+    "package:linux": "npm run build:electron && node_modules/.bin/electron-builder.cmd --linux",
+    "package:all": "npm run build:electron && node_modules/.bin/electron-builder.cmd --win --mac --linux",
+    "package:dir": "npm run build:electron && node_modules/.bin/electron-builder.cmd --dir"
+  },
+  "build": {
+    "appId": "com.mdwriter.app",
+    "productName": "MDWriter",
+    "copyright": "Copyright © 2024",
+    "asar": true,
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "npmRebuild": false,
+    "nodeGypRebuild": false,
+    "files": [
+      "dist-electron/**/*",
+      "dist/**/*",
+      "package.json",
+      "!node_modules/**/*",
+      "!src/**/*",
+      "!electron/**/*",
+      "!*.ts",
+      "!*.tsx",
+      "!tsconfig*.json",
+      "!vite.config.*"
+    ],
+    "extraMetadata": {
+      "main": "dist-electron/electron/main.js"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "appx",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "category": "public.app-category.productivity"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "deb",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "category": "Office"
+    },
+    "appx": {
+      "identityName": "com.mdwriter.app",
+      "publisherDisplayName": "MDWriter",
+      "applicationId": "MDWriter",
+      "displayName": "MDWriter",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-${arch}-Portable.${ext}"
+    }
+  },
+  "dependencies": {
+    "@codemirror/lang-markdown": "^6.5.0",
+    "@codemirror/language-data": "^6.5.2",
+    "@codemirror/view": "^6.39.4",
+    "@lezer/highlight": "^1.2.3",
+    "@types/crypto-js": "^4.2.2",
+    "@types/dompurify": "^3.0.5",
+    "@types/jsdom": "^27.0.0",
+    "@uiw/codemirror-themes": "^4.25.4",
+    "@uiw/react-codemirror": "^4.25.4",
+    "crypto-js": "^4.2.0",
+    "dompurify": "^3.3.1",
+    "html-docx-js-typescript": "^0.1.5",
+    "jsdom": "^27.4.0",
+    "node-machine-id": "^1.1.12",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-markdown": "^10.1.0",
+    "remark-breaks": "^4.0.0",
+    "remark-gfm": "^4.0.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.10.2",
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "cross-env": "^10.1.0",
+    "electron": "^39.2.7",
+    "electron-builder": "^26.0.12",
+    "playwright": "^1.51.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0"
+  }
+}

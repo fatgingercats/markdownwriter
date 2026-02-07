@@ -1,0 +1,88 @@
+.help-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(2px);
+}
+
+.help-modal-content {
+    background: white;
+    width: 600px;
+    max-width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    padding: 30px;
+    position: relative;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.help-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+}
+
+.help-modal-close:hover {
+    color: #333;
+}
+
+.help-modal-content h2 {
+    margin-top: 0;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    color: #333;
+}
+
+.help-section {
+    margin-bottom: 20px;
+}
+
+.help-section h3 {
+    font-size: 1.1em;
+    color: #0cb4f5;
+    margin-bottom: 10px;
+}
+
+.help-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95em;
+}
+
+.help-table th,
+.help-table td {
+    border: 1px solid #eee;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.help-table th {
+    background-color: #f9f9f9;
+    font-weight: 600;
+    color: #555;
+    width: 40%;
+}
+
+.help-table code {
+    background-color: #f4f4f4;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-family: monospace;
+    color: #d14;
+}
