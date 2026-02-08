@@ -39,7 +39,7 @@ jobs:
       - name: Upload CI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: mdwriter-store-appx
+          name: draftone-store-appx
           path: release/*.appx
 
       - name: Attach to GitHub Release
@@ -47,3 +47,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: release/*.appx
+

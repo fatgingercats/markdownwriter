@@ -45,14 +45,14 @@ jobs:
         if: matrix.channel == 'appx'
         uses: actions/upload-artifact@v4
         with:
-          name: mdwriter-appx
+          name: draftone-appx
           path: release/*.appx
 
       - name: Upload CI artifact
         if: matrix.channel == 'portable'
         uses: actions/upload-artifact@v4
         with:
-          name: mdwriter-portable
+          name: draftone-portable
           path: release/*-Portable.exe
 
       - name: Attach AppX to GitHub Release
@@ -66,3 +66,4 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: release/*-Portable.exe
+
