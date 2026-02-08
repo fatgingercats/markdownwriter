@@ -69,7 +69,7 @@ function App() {
         : 'portable';
 
     const initialContent = localStorage.getItem('mdwriter_backup')
-        || '# Welcome to MDWriter\n\nTo focus on the current paragraph, click the eye icon.\n\nThe right side now shows the rendered preview.';
+        || '# Welcome to DraftOne\n\nTo focus on the current paragraph, click the eye icon.\n\nThe right side now shows the rendered preview.';
 
     const [markdown, setMarkdown] = useState<string>(initialContent);
     const [savedSnapshot, setSavedSnapshot] = useState<string>(initialContent);

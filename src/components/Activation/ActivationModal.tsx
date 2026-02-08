@@ -51,7 +51,7 @@ const ActivationModal: React.FC<ActivationModalProps> = ({
     return (
         <div className="activation-overlay">
             <div className="activation-modal">
-                <h2>MDWriter License</h2>
+                <h2>DraftOne License</h2>
                 <p>{canUseTrial ? `Trial active: ${trialDaysLeft} day(s) left` : 'Trial expired. Please activate to continue.'}</p>
 
                 <div className="field">
