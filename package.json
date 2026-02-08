@@ -2,7 +2,7 @@
   "name": "draftone",
   "version": "1.0.0",
   "description": "A minimalist Markdown editor inspired by iA Writer.",
-  "author": "User",
+  "author": "Foundry",
   "license": "MIT",
   "private": true,
   "main": "dist-electron/electron/main.js",
@@ -25,7 +25,7 @@
     "package:dir": "npm run build:electron && node_modules/.bin/electron-builder.cmd --dir"
   },
   "build": {
-    "appId": "com.mdwriter.app",
+    "appId": "com.foundry.draftone",
     "productName": "DraftOne",
     "copyright": "Copyright © 2024",
     "asar": true,
@@ -98,11 +98,13 @@
       "category": "Office"
     },
     "appx": {
-      "identityName": "com.mdwriter.app",
+      "identityName": "com.foundry.draftone",
       "publisherDisplayName": "Foundry",
       "applicationId": "DraftOne",
       "displayName": "DraftOne",
-      "artifactName": "${productName}-${version}-${arch}.${ext}"
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "publisher": "CN=Foundry",
+      "backgroundColor": "#1E90FF"
     },
     "portable": {
       "artifactName": "${productName}-${version}-${arch}-Portable.${ext}"
@@ -143,4 +145,3 @@
     "vite": "^7.3.0"
   }
 }
-
