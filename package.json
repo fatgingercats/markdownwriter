@@ -25,7 +25,7 @@
     "package:dir": "npm run build:electron && node_modules/.bin/electron-builder.cmd --dir"
   },
   "build": {
-    "appId": "com.foundry.draftone",
+    "appId": "Foundry.DraftOne",
     "productName": "DraftOne",
     "copyright": "Copyright © 2024",
     "asar": true,
@@ -98,12 +98,12 @@
       "category": "Office"
     },
     "appx": {
-      "identityName": "com.foundry.draftone",
+      "identityName": "Foundry.DraftOne",
       "publisherDisplayName": "Foundry",
       "applicationId": "DraftOne",
       "displayName": "DraftOne",
       "artifactName": "${productName}-${version}-${arch}.${ext}",
-      "publisher": "CN=Foundry",
+      "publisher": "CN=516A634D-D66F-4204-B449-B424BA2DC1C9",
       "backgroundColor": "#1E90FF"
     },
     "portable": {
