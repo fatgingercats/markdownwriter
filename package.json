@@ -13,21 +13,22 @@
     "electron:start": "cross-env NODE_ENV=development electron .",
     "build:electron": "tsc && vite build && tsc -p tsconfig.electron.json",
     "build:electron:store": "cross-env VITE_LICENSE_MODE=store npm run build:electron",
-    "package": "npm run build:electron && electron-builder --win",
-    "package:win": "npm run build:electron && electron-builder --win",
-    "package:win:appx": "npm run build:electron && electron-builder --win appx --x64",
-    "package:win:appx:store": "cross-env VITE_LICENSE_MODE=store npm run build:electron && electron-builder --win appx --x64",
-    "package:win:portable": "npm run build:electron && electron-builder --win portable --x64",
-    "package:win:dual": "npm run build:electron && electron-builder --win appx portable --x64",
-    "package:mac": "npm run build:electron && node_modules/.bin/electron-builder.cmd --mac",
-    "package:linux": "npm run build:electron && node_modules/.bin/electron-builder.cmd --linux",
-    "package:all": "npm run build:electron && node_modules/.bin/electron-builder.cmd --win --mac --linux",
-    "package:dir": "npm run build:electron && node_modules/.bin/electron-builder.cmd --dir"
+    "package": "npm run prepare:win-icon && npm run build:electron && electron-builder --win",
+    "package:win": "npm run prepare:win-icon && npm run build:electron && electron-builder --win",
+    "package:win:appx": "npm run prepare:win-icon && npm run build:electron && electron-builder --win appx --x64",
+    "package:win:appx:store": "cross-env VITE_LICENSE_MODE=store npm run prepare:win-icon && npm run build:electron && electron-builder --win appx --x64",
+    "package:win:portable": "npm run prepare:win-icon && npm run build:electron && electron-builder --win portable --x64",
+    "package:win:dual": "npm run prepare:win-icon && npm run build:electron && electron-builder --win appx portable --x64",
+    "package:mac": "npm run prepare:win-icon && npm run build:electron && node_modules/.bin/electron-builder.cmd --mac",
+    "package:linux": "npm run prepare:win-icon && npm run build:electron && node_modules/.bin/electron-builder.cmd --linux",
+    "package:all": "npm run prepare:win-icon && npm run build:electron && node_modules/.bin/electron-builder.cmd --win --mac --linux",
+    "package:dir": "npm run prepare:win-icon && npm run build:electron && node_modules/.bin/electron-builder.cmd --dir",
+    "prepare:win-icon": "node scripts/generate-win-icon.mjs"
   },
   "build": {
     "appId": "Foundry.DraftOne",
     "productName": "DraftOne",
-    "copyright": "Copyright © 2024",
+    "copyright": "Copyright \u00a9 2024",
     "asar": true,
     "directories": {
       "output": "release",
@@ -51,7 +52,7 @@
       "main": "dist-electron/electron/main.js"
     },
     "win": {
-      "icon": "build/icon.png",
+      "icon": "build/icon.ico",
       "target": [
         {
           "target": "appx",
@@ -142,6 +143,7 @@
     "electron-builder": "^26.0.12",
     "playwright": "^1.51.0",
     "typescript": "^5.9.3",
-    "vite": "^7.3.0"
+    "vite": "^7.3.0",
+    "png-to-ico": "^2.1.0"
   }
 }

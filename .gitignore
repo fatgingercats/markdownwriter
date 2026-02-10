@@ -33,3 +33,7 @@ Thumbs.db
 
 # Package manager backups
 yarn.lock.bak
+
+# Generated icons
+/build/icon.ico
+

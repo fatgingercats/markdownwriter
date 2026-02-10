@@ -1,4 +1,4 @@
-# MDWriter Release Operations
+# DraftOne Release Operations
 
 ## Distribution Channels
 - `appx`: Microsoft packaging channel, suitable for signed installation deployment.
@@ -49,3 +49,4 @@ If signing is unavailable, AppX installation trust may fail on user machines.
 ## Updater Note
 Portable channel typically uses manual update prompts/download replacement.
 AppX update behavior is different from NSIS/electron-updater flow. Validate your chosen update feed separately before production rollout.
+

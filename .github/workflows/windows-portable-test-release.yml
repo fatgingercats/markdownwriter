@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Prepare Windows icon
+        run: npm run prepare:win-icon
+
       - name: Build (Store mode unlock for testing)
         run: npm run build:electron:store
 

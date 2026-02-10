@@ -99,6 +99,10 @@ function createWindow() {
         titleBarStyle: 'hiddenInset',
     });
 
+    // Hide the default application menu bar.
+    mainWindow.setMenuBarVisibility(false);
+    Menu.setApplicationMenu(null);
+
     const isDev = process.env.NODE_ENV === 'development';
     if (isDev) {
         mainWindow.loadURL('http://localhost:5173');
@@ -266,7 +270,7 @@ async function waitForFile(filePath: string, timeoutMs = 15000): Promise<void> {
 async function runInteractionCheck(): Promise<void> {
     if (!mainWindow) throw new Error('Main window not available.');
 
-    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mdwriter-interaction-'));
+    const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'draftone-interaction-'));
     const docsDir = path.join(tmpRoot, 'docs');
     const outDir = path.join(tmpRoot, 'out');
     fs.mkdirSync(docsDir, { recursive: true });
@@ -321,7 +325,7 @@ async function runInteractionCheck(): Promise<void> {
         `);
 
         console.log('INTERACTION_STEP=wait_editor');
-        await waitForSelector('.editor-header', 20000);
+        await waitForSelector('.editor-toolbar', 20000);
         await mainWindow.webContents.executeJavaScript('(() => { window.alert = () => {}; return true; })()');
 
         console.log('INTERACTION_STEP=open_folder');

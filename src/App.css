@@ -1,4 +1,5 @@
 .app-container {
+    box-sizing: border-box;
     display: flex;
     height: 100vh;
     width: 100vw;
@@ -524,4 +525,192 @@
     background: #111;
     color: #fff;
     font-size: 18px;
+}
+
+
+/* DraftOne Topbar (generated) */
+
+:root {
+    --topbar-h: 56px;
+    --toolbar-h: 48px;
+}
+
+.app-container {
+    box-sizing: border-box;
+    padding-top: var(--topbar-h);
+}
+
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--topbar-h);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #eee;
+    z-index: 1000;
+}
+
+.topbar-left,
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 320px;
+    flex: 0 0 auto;
+}
+
+.topbar-right {
+    justify-content: flex-end;
+}
+
+.topbar-center {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+}
+
+.topbar-filename {
+    display: inline-block;
+    max-width: 100%;
+    font-size: 13px;
+    font-weight: 600;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.brand-by {
+    font-size: 12px;
+    color: #666;
+    white-space: nowrap;
+}
+
+.topbar-btn {
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    padding: 4px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #444;
+    background: #f3f3f3;
+}
+
+.topbar-btn.active {
+    background: #0cb4f5;
+    border-color: #0cb4f5;
+    color: #fff;
+}
+
+.editor-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-toolbar {
+    height: var(--toolbar-h);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 14px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    flex: 0 0 auto;
+    z-index: 20;
+}
+
+.cm-editor-wrapper {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* Button palette */
+.action-btn.save-btn,
+.action-btn.saveas-btn {
+    background: #eeeeee;
+    border-color: #d6d6d6;
+    color: #444;
+}
+
+.action-btn.export-btn {
+    background: #f5f1e6;
+    border-color: #e6dcc6;
+    color: #444;
+}
+
+.action-btn.preview-btn {
+    background: #efe6ff;
+    border-color: #d2b9ff;
+    color: #4c2a7a;
+}
+
+.action-btn.preview-btn:hover {
+    background: #e6d9ff;
+}
+
+.action-btn.preview-btn.active {
+    background: #efe6ff;
+    border-color: #d2b9ff;
+    color: #4c2a7a;
+}
+
+.action-btn.preview-btn.active:hover {
+    background: #e6d9ff;
+}
+
+
+/* Save As dropdown */
+.saveas-wrap {
+    position: relative;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 34px;
+    left: 0;
+    min-width: 170px;
+    background: #fff;
+    border: 1px solid #e6e6e6;
+    border-radius: 10px;
+    padding: 6px;
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.08);
+    z-index: 2000;
+}
+
+.dropdown-item {
+    width: 100%;
+    text-align: left;
+    border: 0;
+    background: transparent;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #333;
+}
+
+.dropdown-item:hover {
+    background: #f3f3f3;
+}
+
+/* Sidebar sizing under fixed topbar */
+.sidebar {
+        overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* When preview hidden, let editor take the full width cleanly */
+.preview-hidden .editor-container {
+    border-right: none;
+}
+
+.preview-hidden .preview-container {
+    display: none;
 }

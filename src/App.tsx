@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import CodeMirrorEditor from './components/Editor/CodeMirrorEditor';
 import Sidebar from './components/Sidebar/Sidebar';
 import ReactMarkdown from 'react-markdown';
@@ -68,7 +68,8 @@ function App() {
         ? 'store'
         : 'portable';
 
-    const initialContent = localStorage.getItem('mdwriter_backup')
+    const initialContent = localStorage.getItem('draftone_backup')
+        || localStorage.getItem('mdwriter_backup')
         || '# Welcome to DraftOne\n\nTo focus on the current paragraph, click the eye icon.\n\nThe right side now shows the rendered preview.';
 
     const [markdown, setMarkdown] = useState<string>(initialContent);
@@ -80,6 +81,16 @@ function App() {
     const [isSaving, setIsSaving] = useState<boolean>(false);
     const [focusMode, setFocusMode] = useState<boolean>(true);
     const [fontSize, setFontSize] = useState<number>(19);
+    const [libraryVisible, setLibraryVisible] = useState<boolean>(true);
+    const [previewVisible, setPreviewVisible] = useState<boolean>(true);
+    const [saveAsMenuOpen, setSaveAsMenuOpen] = useState<boolean>(false);
+
+    const dirty = useMemo(() => markdown !== savedSnapshot, [markdown, savedSnapshot]);
+
+    const autosaveRef = useRef({ markdown, currentFilePath, dirty });
+    useEffect(() => {
+        autosaveRef.current = { markdown, currentFilePath, dirty };
+    }, [markdown, currentFilePath, dirty]);
 
     const [helpVisible, setHelpVisible] = useState(false);
 
@@ -87,9 +98,6 @@ function App() {
     const [licenseBusy, setLicenseBusy] = useState(false);
     const [licenseError, setLicenseError] = useState('');
     const [checkingActivation, setCheckingActivation] = useState(true);
-
-    const dirty = useMemo(() => markdown !== savedSnapshot, [markdown, savedSnapshot]);
-
     const refreshLicenseAccess = async () => {
         setCheckingActivation(true);
         setLicenseError('');
@@ -114,8 +122,20 @@ function App() {
     }, []);
 
     useEffect(() => {
-        localStorage.setItem('mdwriter_backup', markdown);
+        localStorage.setItem('draftone_backup', markdown);
     }, [markdown]);
+
+    useEffect(() => {
+        const handleMouseDown = (event: MouseEvent) => {
+            const target = event.target as HTMLElement | null;
+            if (!target) return;
+            if (target.closest('.saveas-wrap')) return;
+            setSaveAsMenuOpen(false);
+        };
+
+        document.addEventListener('mousedown', handleMouseDown);
+        return () => document.removeEventListener('mousedown', handleMouseDown);
+    }, []);
 
     useEffect(() => {
         const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -127,30 +147,35 @@ function App() {
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }, [dirty]);
-
     useEffect(() => {
-        if (!isElectronDesktop() || !currentFilePath || !dirty) {
-            return;
-        }
+        if (!isElectronDesktop()) return;
 
-        const timer = setTimeout(async () => {
+        let inFlight = false;
+        const timer = setInterval(async () => {
+            const snap = autosaveRef.current;
+            if (!snap.currentFilePath || !snap.dirty) return;
+            if (inFlight) return;
+
+            inFlight = true;
             try {
                 const { ipcRenderer } = (window as any).require('electron');
                 const result = await ipcRenderer.invoke('save-file', {
-                    filePath: currentFilePath,
-                    content: markdown,
+                    filePath: snap.currentFilePath,
+                    content: snap.markdown,
                 }) as FileOperationResult;
 
                 if (result.success) {
-                    setSavedSnapshot(markdown);
+                    setSavedSnapshot(snap.markdown);
                 }
             } catch (err) {
                 console.error('Autosave failed:', err);
+            } finally {
+                inFlight = false;
             }
-        }, 1500);
+        }, 3000);
 
-        return () => clearTimeout(timer);
-    }, [markdown, currentFilePath, dirty]);
+        return () => clearInterval(timer);
+    }, []);
 
     useEffect(() => {
         const handler = async (event: KeyboardEvent) => {
@@ -410,6 +435,17 @@ function App() {
         }
     };
 
+    
+    const handleSaveAsMarkdown = async () => {
+        setSaveAsMenuOpen(false);
+        return handleSaveAs();
+    };
+
+    const handleSaveAsExport = async (type: ExportType) => {
+        setSaveAsMenuOpen(false);
+        return handleExport(type);
+    };
+
     if (checkingActivation) return <div className="loading">Checking activation...</div>;
     if (licenseMode !== 'store' && !licenseState?.allowed) {
         return (
@@ -429,101 +465,146 @@ function App() {
     }
 
     return (
-        <div className={`app-container ${focusMode ? 'focus-active' : ''}`}>
-            <Sidebar
-                files={fileList}
-                activeFile={currentFileName}
-                onSelectFile={handleSelectFile}
-                onNewFile={handleNewFile}
-                onOpenFolder={handleOpenFolder}
-                onHelp={() => setHelpVisible(true)}
-            />
+        <div className={`app-container ${focusMode ? 'focus-active' : ''} ${libraryVisible ? '' : 'library-hidden'} ${previewVisible ? '' : 'preview-hidden'}`}>
+            <header className="topbar">
+                <div className="topbar-left">
+                    <button
+                        className={`topbar-btn ${libraryVisible ? 'active' : ''}`}
+                        onClick={() => setLibraryVisible((v) => !v)}
+                        title="Toggle Library"
+                    >
+                        Library
+                    </button>
+                    <span className={`dirty-badge ${dirty ? 'dirty' : 'clean'}`}>
+                        {dirty ? 'Unsaved' : (isSaving ? 'Saving...' : 'Saved')}
+                    </span>
+                </div>
+                <div className="topbar-center" title={currentFilePath || currentFileName}>
+                    <span className="topbar-filename">{currentFileName}</span>
+                </div>
+                <div className="topbar-right">
+                    <span className={`license-badge ${licenseState?.mode || 'licensed'}`}>
+                        {licenseMode === 'store'
+                            ? 'Store Licensed'
+                            : licenseState?.mode === 'licensed'
+                            ? 'Licensed'
+                            : `trial ${licenseState?.trialDaysLeft ?? 0}d`}
+                    </span>
+                    <span className="brand-by">by Foundry</span>
+                </div>
+            </header>
+
+            {libraryVisible && (
+                <Sidebar
+                    files={fileList}
+                    activeFile={currentFileName}
+                    onSelectFile={handleSelectFile}
+                    onNewFile={handleNewFile}
+                    onOpenFolder={handleOpenFolder}
+                    onHelp={() => setHelpVisible(true)}
+                />
+            )}
 
             <main className="editor-container">
-                <div className="editor-header">
-                    <div className="file-status">
-                        <span className="file-name">{currentFileName}</span>
-                        <span className={`license-badge ${licenseState?.mode || 'licensed'}`}>
-                            {licenseMode === 'store'
-                                ? 'Store Licensed'
-                                : licenseState?.mode === 'licensed'
-                                ? 'Licensed'
-                                : `Trial ${licenseState?.trialDaysLeft ?? 0}d`}
-                        </span>
-                        <span className={`dirty-badge ${dirty ? 'dirty' : 'clean'}`}>
-                            {dirty ? 'Unsaved' : (isSaving ? 'Saving...' : 'Saved')}
-                        </span>
-                    </div>
-                    <div className="header-actions">
+                <div className="editor-toolbar">
+                    <button
+                        onClick={() => setFocusMode(!focusMode)}
+                        className={`action-btn ${focusMode ? 'active' : ''}`}
+                        title="Toggle Focus Mode"
+                    >
+                        {focusMode ? 'Focused' : 'Focus'}
+                    </button>
+
+                    <button className="action-btn save-btn" onClick={handleSave}>Save</button>
+
+                    <div className="saveas-wrap">
                         <button
-                            onClick={() => setFocusMode(!focusMode)}
-                            className={`action-btn ${focusMode ? 'active' : ''}`}
-                            title="Toggle Focus Mode"
+                            className="action-btn saveas-btn"
+                            onClick={() => setSaveAsMenuOpen((v) => !v)}
+                            aria-haspopup="menu"
+                            aria-expanded={saveAsMenuOpen}
                         >
-                            {focusMode ? 'Focused' : 'Focus'}
+                            Save As
                         </button>
-                        <button className="action-btn" onClick={handleSave}>Save</button>
-                        <button className="action-btn" onClick={handleSaveAs}>Save As</button>
-                        <div className="font-control">
-                            <label htmlFor="font-size-select">Font</label>
-                            <select
-                                id="font-size-select"
-                                value={fontSize}
-                                onChange={(e) => setFontSize(Number(e.target.value))}
-                            >
-                                {[14, 16, 18, 20, 24, 28].map((size) => (
-                                    <option key={size} value={size}>{size}px</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="export-menu">
-                            <button className="action-btn" onClick={() => handleExport('markdown')}>Export .md</button>
-                            <button className="action-btn" onClick={() => handleExport('docx')}>Export .docx</button>
-                            <button className="action-btn" onClick={() => handleExport('pdf')}>Export .pdf</button>
-                            <button className="action-btn" onClick={() => handleExport('jpeg')}>Export .jpeg</button>
-                        </div>
+                        {saveAsMenuOpen && (
+                            <div className="dropdown-menu" role="menu">
+                                <button className="dropdown-item" onClick={handleSaveAsMarkdown} role="menuitem">Save as .md</button>
+                                <button className="dropdown-item" onClick={() => handleSaveAsExport('docx')} role="menuitem">Save as .docx</button>
+                                <button className="dropdown-item" onClick={() => handleSaveAsExport('pdf')} role="menuitem">Save as .pdf</button>
+                                <button className="dropdown-item" onClick={() => handleSaveAsExport('jpeg')} role="menuitem">Save as .jpeg</button>
+                            </div>
+                        )}
+                    </div>
+
+                    <button
+                        className={`action-btn preview-btn ${previewVisible ? 'active' : ''}`}
+                        onClick={() => setPreviewVisible((v) => !v)}
+                        title="Toggle Preview"
+                    >
+                        Preview
+                    </button>
+
+                    <div className="font-control">
+                        <label htmlFor="font-size-select">Font</label>
+                        <select
+                            id="font-size-select"
+                            value={fontSize}
+                            onChange={(e) => setFontSize(Number(e.target.value))}
+                        >
+                            {[14, 16, 18, 20, 24, 28].map((size) => (
+                                <option key={size} value={size}>{size}px</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="export-menu">
+                        <button className="action-btn export-btn" onClick={() => handleExport('markdown')}>Export .md</button>
+                        <button className="action-btn export-btn" onClick={() => handleExport('docx')}>Export .docx</button>
+                        <button className="action-btn export-btn" onClick={() => handleExport('pdf')}>Export .pdf</button>
+                        <button className="action-btn export-btn" onClick={() => handleExport('jpeg')}>Export .jpeg</button>
                     </div>
                 </div>
+
                 <CodeMirrorEditor value={markdown} onChange={setMarkdown} fontSize={fontSize} />
             </main>
 
             <aside className="preview-container">
-                <div className="preview-content">
-                    <ReactMarkdown
-                        remarkPlugins={[remarkGfm, remarkBreaks]}
-                        components={{
-                            a: ({ ...props }) => (
-                                <a
-                                    {...props}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        let href = props.href || '';
-                                        if (!href) return;
+                    <div className="preview-content">
+                        <ReactMarkdown
+                            remarkPlugins={[remarkGfm, remarkBreaks]}
+                            components={{
+                                a: ({ ...props }) => (
+                                    <a
+                                        {...props}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            let href = props.href || '';
+                                            if (!href) return;
 
-                                        if (!/^https?:\/\//i.test(href) && !/^mailto:/i.test(href)) {
-                                            href = 'https://' + href;
-                                        }
+                                            if (!/^https?:\/\//i.test(href) && !/^mailto:/i.test(href)) {
+                                                href = 'https://' + href;
+                                            }
 
-                                        if (isElectronDesktop()) {
-                                            try {
-                                                const { ipcRenderer } = (window as any).require('electron');
-                                                ipcRenderer.send('open-external', href);
-                                            } catch (_err) {
+                                            if (isElectronDesktop()) {
+                                                try {
+                                                    const { ipcRenderer } = (window as any).require('electron');
+                                                    ipcRenderer.send('open-external', href);
+                                                } catch (_err) {
+                                                    window.open(href, '_blank');
+                                                }
+                                            } else {
                                                 window.open(href, '_blank');
                                             }
-                                        } else {
-                                            window.open(href, '_blank');
-                                        }
-                                    }}
-                                />
-                            )
-                        }}
-                    >
-                        {markdown}
-                    </ReactMarkdown>
-                </div>
+                                        }}
+                                    />
+                                )
+                            }}
+                        >
+                            {markdown}
+                        </ReactMarkdown>
+                    </div>
             </aside>
 
             {helpVisible && <HelpModal onClose={() => setHelpVisible(false)} />}

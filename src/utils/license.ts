@@ -31,6 +31,14 @@ interface DeviceFingerprint {
 }
 
 const STORAGE_KEYS = {
+    deviceId: 'draftone_device_id',
+    trialExpireAt: 'draftone_trial_expire_at',
+    licenseToken: 'draftone_license_token',
+    orderNo: 'draftone_order_no',
+    fingerprint: 'draftone_hardware_fingerprint',
+};
+
+const LEGACY_STORAGE_KEYS = {
     deviceId: 'mdwriter_device_id',
     trialExpireAt: 'mdwriter_trial_expire_at',
     licenseToken: 'mdwriter_license_token',
@@ -39,6 +47,20 @@ const STORAGE_KEYS = {
 };
 
 const TRIAL_DAYS = 7;
+
+function migrateLegacyStorage(): void {
+    // One-time migration: keep existing installs working after rename.
+    for (const key of Object.keys(STORAGE_KEYS) as Array<keyof typeof STORAGE_KEYS>) {
+        const nextKey = STORAGE_KEYS[key];
+        const legacyKey = (LEGACY_STORAGE_KEYS as any)[key] as string | undefined;
+        if (!legacyKey) continue;
+        if (localStorage.getItem(nextKey) != null) continue;
+        const legacyValue = localStorage.getItem(legacyKey);
+        if (legacyValue == null) continue;
+        localStorage.setItem(nextKey, legacyValue);
+    }
+}
+
 
 interface ApiResult {
     ok: boolean;
@@ -72,6 +94,7 @@ function randomId(): string {
 }
 
 function loadCachedFingerprint(): DeviceFingerprint {
+    migrateLegacyStorage();
     const deviceId = localStorage.getItem(STORAGE_KEYS.deviceId) || randomId();
     const raw = localStorage.getItem(STORAGE_KEYS.fingerprint);
     if (!raw) return { deviceId };
@@ -191,6 +214,7 @@ function updateCachedState(result: ApiResult) {
 }
 
 export async function initializeLicenseAccess(): Promise<LicenseAccessState> {
+    migrateLegacyStorage();
     const fingerprint = await getDeviceFingerprint();
     const deviceId = fingerprint.deviceId;
     const apiBase = getApiBaseUrl();

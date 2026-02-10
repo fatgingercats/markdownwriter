@@ -1,5 +1,5 @@
 /**
- * Key Generator script for MDWriter
+ * Key Generator script for DraftOne
  * Usage: node generate-key.js <MACHINE_ID>
  */
 const crypto = require('crypto');
@@ -25,3 +25,4 @@ if (args.length === 0) {
     console.log(`Activation Code: ${key}`);
     console.log('------------------------------------');
 }
+
