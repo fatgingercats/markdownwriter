@@ -1,16 +1,16 @@
-name: windows-store-release
+name: windows-portable-test-release
 
 on:
   push:
     tags:
-      - 'v*-store.*'
+      - 'v*-portable-test.*'
   workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
-  build-store-appx:
+  build-portable-test:
     runs-on: windows-latest
 
     steps:
@@ -26,25 +26,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build (Store mode)
+      - name: Build (Store mode unlock for testing)
         run: npm run build:electron:store
 
-      - name: Package AppX (Store mode)
-        env:
-          VITE_LICENSE_MODE: store
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-        run: npx electron-builder --win appx --x64
+      - name: Package Portable (x64)
+        run: npx electron-builder --win portable --x64
 
       - name: Upload CI artifact
         uses: actions/upload-artifact@v4
         with:
-          name: draftone-store-appx
-          path: release/*.appx
+          name: draftone-portable-test
+          path: release/*-Portable.exe
 
       - name: Attach to GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: release/*.appx
-
+          files: release/*-Portable.exe
